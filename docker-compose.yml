@@ -1,0 +1,38 @@
+services:
+  gpac:
+    image: gpac/ubuntu:latest
+    container_name: gpac-scte-packager
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./output:/output
+      - ./scripts:/scripts:ro
+      - ./logs:/logs
+    entrypoint: ["/bin/bash", "-lc"]
+    command: ["sleep infinity"]
+
+  analyzer:
+    build:
+      context: ./docker/analyzer
+    container_name: gpac-scte-analyzer
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./logs:/logs
+    entrypoint: ["/bin/bash", "-lc"]
+    command: ["sleep infinity"]
+
+  nginx:
+    image: nginx:alpine
+    container_name: gpac-scte-nginx
+    restart: unless-stopped
+    ports:
+      - "${HLS_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./output:/usr/share/nginx/html:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - gpac

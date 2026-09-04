@@ -1,0 +1,19 @@
+FROM ubuntu:24.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TSDUCK_DEB_URL=https://tsduck.io/download/prerelease/tsduck_3.44-4676.ubuntu24_amd64.deb
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates curl ffmpeg bash jq procps net-tools iproute2 \
+ && rm -rf /var/lib/apt/lists/*
+
+# TSDuck publishes Ubuntu .deb packages. Keep the URL as a build ARG so
+# Codex can update/pin it after validating the currently available release.
+RUN curl -fL "$TSDUCK_DEB_URL" -o /tmp/tsduck.deb \
+ && apt-get update \
+ && apt-get install -y /tmp/tsduck.deb \
+ && rm -f /tmp/tsduck.deb \
+ && rm -rf /var/lib/apt/lists/*
+
+CMD ["sleep", "infinity"]
